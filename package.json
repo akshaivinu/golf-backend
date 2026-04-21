@@ -1,0 +1,31 @@
+{
+  "name": "golf-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akshaivinu/golf-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/akshaivinu/golf-backend/issues"
+  },
+  "homepage": "https://github.com/akshaivinu/golf-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
