@@ -23,9 +23,17 @@ export const protect = async (req, res, next) => {
 
         if (profileError) {
             // Profile might not exist yet if they just signed up
-            req.user = { ...user, profile: null }
+            req.user = { ...user, profile: null, subscription: null }
         } else {
-            req.user = { ...user, profile }
+            // Check subscription status
+            const { data: subscription } = await supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .single()
+
+            req.user = { ...user, profile, subscription }
         }
 
         next()
@@ -35,16 +43,37 @@ export const protect = async (req, res, next) => {
     }
 }
 
-export const adminOnly = async (req, res, next) => {
-    if (req.user?.profile?.subscription_plan !== 'admin') { // Or use the is_admin flag if I added it
-        // Actually, let's check the is_admin flag from the profile if I added it to the schema
-        // The user didn't specify an is_admin flag in their users table, but mentioned an Admin role.
-        // I'll assume for now we use a specific flag or email check.
-        const isAdmin = req.user?.email?.endsWith('@admin.com') || req.user?.profile?.is_admin;
-        
-        if (!isAdmin) {
-            return res.status(403).json({ error: 'Access denied: Admins only' })
-        }
+/**
+ * Middleware: Admins only.
+ * Checks req.user.profile.role === 'admin'.
+ * Must be used AFTER protect.
+ */
+export const adminOnly = (req, res, next) => {
+    if (req.user?.profile?.role !== 'admin') {
+        return res.status(403).json({ error: 'Access denied: Admins only' })
     }
+    next()
+}
+
+/**
+ * Middleware: Subscribers OR Admins.
+ * Admins bypass subscription check entirely.
+ * Must be used AFTER protect.
+ */
+export const subscriberOrAdmin = (req, res, next) => {
+    const role = req.user?.profile?.role
+
+    // Admins always pass
+    if (role === 'admin') return next()
+
+    // Subscribers need an active subscription
+    const subscription = req.user?.subscription
+    if (!subscription || subscription.status !== 'active') {
+        return res.status(403).json({
+            error: 'Subscription required',
+            message: 'You must have an active subscription to access this feature.'
+        })
+    }
+
     next()
 }

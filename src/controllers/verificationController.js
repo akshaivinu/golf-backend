@@ -25,7 +25,6 @@ export const uploadProof = async (req, res) => {
             .from('winner_verifications')
             .insert({
                 draw_result_id,
-                user_id: userId,
                 proof_file_url,
                 admin_status: 'pending'
             })
@@ -87,5 +86,29 @@ export const reviewProof = async (req, res) => {
     } catch (error) {
         console.error('Review proof error:', error)
         res.status(500).json({ error: 'Failed to review proof.' })
+    }
+}
+
+export const getPendingVerifications = async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('winner_verifications')
+            .select(`
+                *,
+                draw_results (
+                    user_id,
+                    match_count,
+                    prize_amount
+                )
+            `)
+            .eq('admin_status', 'pending')
+            .order('created_at', { ascending: true })
+
+        if (error) throw error
+
+        res.status(200).json(data)
+    } catch (error) {
+        console.error('Get pending verifications error:', error)
+        res.status(500).json({ error: 'Failed to fetch pending claims.' })
     }
 }

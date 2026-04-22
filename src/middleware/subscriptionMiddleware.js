@@ -1,12 +1,20 @@
+/**
+ * Middleware: Active subscription required.
+ * Admins bypass this check automatically.
+ * Must be used AFTER protect.
+ */
 export const subscriberOnly = (req, res, next) => {
-    const profile = req.user?.profile;
-    
-    if (!profile || profile.subscription_status !== 'active') {
-        return res.status(403).json({ 
-            error: 'Subscription required', 
-            message: 'You must have an active subscription to perform this action.' 
+    // Admins are exempt from subscription requirements
+    if (req.user?.profile?.role === 'admin') return next()
+
+    const subscription = req.user?.subscription
+
+    if (!subscription || subscription.status !== 'active') {
+        return res.status(403).json({
+            error: 'Subscription required',
+            message: 'You must have an active subscription to access this feature.'
         })
     }
-    
+
     next()
 }

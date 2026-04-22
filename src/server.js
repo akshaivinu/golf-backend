@@ -10,6 +10,7 @@ import drawRoutes from './routes/drawRoutes.js'
 import charityRoutes from './routes/charityRoutes.js'
 import subscriptionRoutes, { stripeWebhook } from './routes/subscriptionRoutes.js'
 import verificationRoutes from './routes/verificationRoutes.js'
+import adminRoutes from './routes/adminRoutes.js'
 
 
 const app = express()
@@ -36,8 +37,9 @@ app.get('/health', (req, res) => {
 app.use('/api/scores', scoreRoutes)
 app.use('/api/draws', drawRoutes)
 app.use('/api/charities', charityRoutes)
-app.use('/api/subscriptions', subscriptionRoutes) // This handles create-checkout
+app.use('/api/subscriptions', subscriptionRoutes)
 app.use('/api/verify', verificationRoutes)
+app.use('/api/admin', adminRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
